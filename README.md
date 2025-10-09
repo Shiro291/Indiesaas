@@ -1,135 +1,280 @@
-<div align="center">
-  <img src="public/logo.svg" alt="IndieSaas Starter Logo" width="80" height="80">
-  <h1 style="color: #FB923C; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 42px; text-align: center; margin: 20px 0 0 0;">
-    IndieSaas Starter
-  </h1>
-</div>
+# EventTS - Event Management Application
 
+EventTS is a modern, full-stack web platform for event discovery and management built with Next.js, Drizzle ORM, and a variety of modern technologies.
 
-A modern, Next.js Saas boilerplate with comprehensive authentication built on Better Auth, featuring a beautiful UI with shadcn/ui components and a robust tech stack.
+## Features
+
+### Public Features
+- Event discovery with search and filtering
+- Event detail pages with real-time registration counters
+- User dashboard for managing registrations
+- Multi-step registration flow with attendee details
+- Online payments via Ipaymu
+- File uploads for documents
+
+### Admin Features
+- Admin dashboard with analytics
+- Event management (CRUD operations)
+- Registration management and filtering
+- Category management
+- Event archiving
+- Export to CSV
 
 ## Tech Stack
 
-- **Better Auth UI** - Pre-built authentication components
-- **shadcn/ui** - Beautiful, accessible component library
-- **Stripe** - Payment Provider
-- **Biome** - Fast linter and formatter
-- **Turborepo** - Monorepo build system
-- **PostgreSQL** - Robust, production-ready database
-- **Drizzle ORM** - Type-safe database queries
-- **UploadThing** - Modern file uploads with built-in storage
-- **Resend** - Transactional email service
+- **Framework**: Next.js 15 with App Router
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Better Auth UI
+- **Payments**: Ipaymu
+- **File Uploads**: UploadThing
+- **Emails**: Resend
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Code Quality**: Biome
 
+## Setup
 
-## Roadmap
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Run migrations: `npx drizzle-kit push`
+5. Start the development server: `npm run dev`
 
-- [x] landing page
-- [x] Authentication with Better Auth
-- [x] Dashboard
-- [x] Stripe Payment
+## Environment Variables
 
+You need to set the following environment variables in a `.env.local` file:
 
+```env
+# Required for authentication
+BETTER_AUTH_SECRET="" # Generate a secure secret key
+BETTER_AUTH_URL="http://localhost:3000"
 
+# Required for database connection
+DATABASE_URL="" # Your PostgreSQL connection string
 
-##  Quick start
+# Site URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000" # Your application URL
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/indieceo/Indiesaas
-cd indiesaas
+# Needed for payment processing (Ipaymu)
+IPAYMU_API_KEY="" # Your Ipaymu API key
+IPAYMU_MERCHANT_CODE="" # Your Ipaymu merchant code
+IPAYMU_BASE_URL="https://my.ipaymu.com" # Ipaymu base URL (production or sandbox)
+
+# Needed for emails (Resend)
+RESEND_API_KEY="" # Your Resend API key
+MAIL_FROM="noreply@yourdomain.com" # Email address to send from
+
+# Needed for file uploads (UploadThing)
+UPLOADTHING_TOKEN="" # Your UploadThing token
+
+# Optional: OAuth providers (configure as needed)
+# GOOGLE_CLIENT_ID=""
+# GOOGLE_CLIENT_SECRET=""
+# GITHUB_CLIENT_ID=""
+# GITHUB_CLIENT_SECRET=""
+# TWITTER_CLIENT_ID=""
+# TWITTER_CLIENT_SECRET=""
+
+# Needed for Stripe plugin (if using)
+STRIPE_SECRET_KEY="sk_test_..." # Your Stripe secret key
+STRIPE_WEBHOOK_SECRET="whsec_..." # Your Stripe webhook secret
 ```
 
-### 2. Install Dependencies
+## Getting Your API Keys
+
+### Better Auth Secret Key
+1. Generate a secure secret key using:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+### Database URL
+1. Sign up for a PostgreSQL database provider (like Neon, Supabase, or AWS RDS)
+2. Create a new database
+3. Copy the connection string and add it to `DATABASE_URL`
+
+### Ipaymu API Keys
+1. Register for an Ipaymu merchant account at [ipaymu.com](https://www.ipaymu.com/)
+2. Log into your Ipaymu dashboard
+3. Navigate to Settings > API Settings
+4. Copy your API key and merchant code
+5. For testing, you can use Ipaymu's sandbox environment
+
+### Resend API Key
+1. Sign up for an account at [resend.com](https://resend.com/)
+2. Create an API key in the dashboard
+3. Verify your sending domain if needed
+
+### UploadThing Token
+1. Sign up for an account at [uploadthing.com](https://uploadthing.com/)
+2. Create a new application
+3. Copy your application token from the settings
+
+### Stripe Keys (Optional)
+1. Sign up for a Stripe account at [stripe.com](https://stripe.com/)
+2. In the dashboard, go to Developers > API keys
+3. Copy your secret key and webhook signing secret
+
+## Admin Access
+
+To access the admin panel, you first need to create an account and then use the secret key authentication:
+- Navigate to `/admin/login`
+- Use your account credentials along with the secret key: `13June2003`
+
+## API Endpoints
+
+### Public APIs
+- `GET /api/events` - Get all events with search and filter options
+- `GET /api/events/[id]` - Get specific event details
+- `POST /api/events/[id]/register` - Register for an event
+
+### Admin APIs
+- `GET|POST /api/admin/events` - Manage events
+- `GET /api/admin/events/[id]/registrations` - Get event registrations
+- `GET /api/admin/events/[id]/registrations/export` - Export registrations to CSV
+- `GET /api/admin/analytics` - Get analytics data
+- `GET|POST /api/admin/categories` - Manage categories
+- `POST /api/admin/login` - Authenticate admin access
+- `POST /api/payments/ipaymu-callback` - Handle payment callbacks from Ipaymu
+
+## Project Structure
+
+```
+src/
+├── app/                 # Next.js App Router pages
+│   ├── (marketing)      # Marketing pages (home, about, etc.)
+│   ├── admin/           # Admin panel pages
+│   ├── api/             # API routes for events, payments, auth
+│   ├── auth/            # Authentication pages
+│   ├── dashboard/       # User dashboard
+│   ├── events/          # Public event pages
+│   ├── registration/    # Registration flow pages
+│   ├── layout.tsx       # Root layout
+│   ├── page.tsx         # Homepage
+│   └── providers.tsx    # Global providers
+├── components/          # React components
+│   ├── admin/          # Admin-specific components
+│   ├── icons/          # Icon components
+│   ├── layout/         # Layout components
+│   ├── ui/             # Reusable UI components
+│   └── uploadthing.tsx # UploadThing component
+├── config/             # Configuration files
+│   └── site.ts         # Site configuration
+├── database/           # Database schema and connection
+│   ├── db.ts           # Database connection
+│   └── schema.ts       # Database schema definitions
+├── lib/                # Utility functions and services
+│   ├── ipaymu/         # Ipaymu service
+│   ├── payments/       # Payment-related functions
+│   ├── services/       # Business logic services
+│   ├── admin-auth.ts   # Admin authentication helpers
+│   ├── auth.ts         # Authentication setup
+│   ├── auth-client.ts  # Client-side auth helpers
+│   ├── uploadthing.ts  # UploadThing helpers
+│   └── utils.ts        # Utility functions
+└── styles/             # Global styles
+```
+
+## Database Schema
+
+The application uses the following main tables:
+- `users` - User accounts
+- `events` - Event information
+- `categories` - Event categories
+- `tickets` - Ticket types for events
+- `registrations` - User registrations
+- `attendees` - Attendee information for registrations
+- `messages` - Bulk messaging system
+- `eventStatistics` - Analytics data
+- `sessions` - Authentication sessions
+- `accounts` - OAuth account information
+- `verifications` - Email verification tokens
+- `subscriptions` - User subscriptions (if using Stripe)
+
+## Payment Integration
+
+The application uses Ipaymu for payment processing. The payment flow is:
+1. User selects tickets and completes registration details
+2. System creates a payment transaction with Ipaymu
+3. User is redirected to Ipaymu's payment page
+4. After payment, Ipaymu sends a callback to `/api/payments/ipaymu-callback`
+5. System updates registration status based on callback
+
+## File Uploads
+
+File uploads are handled through UploadThing for:
+- Event images (when creating/editing events)
+- Attendee biodata documents
+- Parental consent forms
+
+## Development
+
+### Running the Application
 ```bash
+# Install dependencies
 npm install
-# or
-pnpm install
+
+# Run database migrations
+npx drizzle-kit push
+
+# Start development server
+npm run dev
 ```
 
-### 3. Environment Setup
-Copy `.env.example` to `.env.local` and update the variables.
-
+### Running Database Migrations
 ```bash
-cp .env.example .env.local
-```
+# Push schema changes to database
+npx drizzle-kit push
 
-### 4. Database Setup
-Generate the authentication schema and run migrations:
-
-```bash
-# Generate Better Auth schema
-npx @better-auth/cli generate
-
-# Generate Drizzle migrations
+# Generate a new migration
 npx drizzle-kit generate
 
-# Run migrations
-npx drizzle-kit migrate
+# View database in studio
+npx drizzle-kit studio
 ```
 
-### 5. Start Development Server
+### Type Checking
 ```bash
-npm run dev
-# or
-pnpm dev
+npm run check-types
 ```
 
-##  Configuration
+### Code Quality
+```bash
+npm run lint
+```
 
-### Site Configuration
-Customize your website settings in `src/config/site.ts`:
-- App name, description, and branding
-- Email addresses for support and system emails
-- Social media links
-- Logo and OG image paths
+## Deployment
 
-### Better Auth Configuration
-The authentication is configured in `src/lib/auth.ts`. You can customize:
-- OAuth providers (Google, GitHub, etc.)
-- Email templates
-- Session settings
-- Password policies
+### Prerequisites
+- A PostgreSQL database (Neon, Supabase, AWS RDS, etc.)
+- API keys for all required services (Ipaymu, Resend, UploadThing, etc.)
 
-### Database Configuration
-Database connection and schema are managed through:
-- `drizzle.config.ts` - Drizzle ORM configuration
-- `src/database/schema.ts` - Better Auth schema definition
+### Environment Variables for Production
+Ensure you have all required environment variables set in your production environment:
+- `DATABASE_URL` - Production database URL
+- `BETTER_AUTH_SECRET` - Production secret key
+- `BETTER_AUTH_URL` - Production URL
+- `NEXT_PUBLIC_APP_URL` - Production application URL
+- All other API keys for external services
 
-### UI Customization
-The UI is built with shadcn/ui components and can be customized:
-- Theme colors in `src/styles/globals.css`
-- Custom styles in `src/styles/custom.css`
-- Component variants in individual component files
+### Building and Deploying
+```bash
+# Build the application
+npm run build
 
+# Start the production server
+npm start
+```
 
-## Usage
+## File Upload Configuration
 
-Feel free to use and customize this template as per your requirements. You can modify the components, styles, and content to create your unique website.
+The application uses UploadThing for file uploads. To use this feature:
+1. Create an account at [uploadthing.com](https://uploadthing.com/)
+2. Get your API key from the dashboard
+3. Configure your `UPLOADTHING_TOKEN` in the environment variables
+4. For local development, you might need to set up webhook endpoints to handle file upload callbacks
 
 ## License
 
-This project is licensed under the MIT License. You are free to use, modify, and distribute it as you wish.
-
-## 🙏 Credits
-
-
-- [Better Auth Ui](https://better-auth-ui.com) - Pre-built authentication components
-- [shadcn landing page](https://github.com/nobruf/shadcn-landing-page) - landing page used for this project
-
-
-
----
-
-<div align="center" >
-  <p><strong>Sponsored by Posthyve</strong></p>
-  <a href="https://posthyve.com" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-    <img src="https://posthyve.com/logo.svg" alt="Posthyve" width="32" height="32">
-  </a>
-  <p><em>All-in-One Social Media Management Platform</em></p>
-</div>
-
-<div align="center">
-
-  **Made with ❤️ by [INDIETECH](https://indietech.dev)**
-
-</div>
+MIT

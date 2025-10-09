@@ -1,0 +1,358 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import Link from "next/link";
+import { useSession } from "@daveyplate/better-auth-ui/react";
+import { useRouter } from "next/navigation";
+
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  startDate: string; // ISO string
+  endDate: string; // ISO string
+  registrationOpenDate: string; // ISO string
+  registrationCloseDate: string; // ISO string
+  location: string;
+  image?: string;
+  maxCapacity: number;
+  adminFee: number;
+  categories: {
+    category: {
+      name: string;
+    };
+  }[];
+  tickets: {
+    id: number;
+    name: string;
+    description?: string;
+    price: number; // in cents
+    availableFrom: string;
+    availableUntil: string;
+    maxCapacity: number;
+    type: string;
+  }[];
+  isRegistrationOpen: boolean;
+}
+
+export default function EventDetailPage({ params }: { params: { id: string } }) {
+  const eventId = parseInt(params.id);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState("");
+  const [selectedTickets, setSelectedTickets] = useState<{[key: number]: number}>({});
+  
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    // In a real app, this would be an API call
+    // For now, using mock data
+    const mockEvent: Event = {
+      id: eventId,
+      title: "Pencak Silat Championship 2025",
+      description: "Annual championship for Pencak Silat practitioners of all levels. This prestigious event will feature the best fighters from across Indonesia and international guests.",
+      startDate: "2025-03-15T09:00:00.000Z",
+      endDate: "2025-03-17T18:00:00.000Z",
+      registrationOpenDate: "2025-01-01T00:00:00.000Z",
+      registrationCloseDate: "2025-03-10T23:59:59.000Z",
+      location: "Jakarta Convention Center",
+      maxCapacity: 500,
+      adminFee: 15000, // 15,000 IDR in cents
+      categories: [
+        { category: { name: "Martial Arts" } },
+        { category: { name: "Competition" } }
+      ],
+      tickets: [
+        {
+          id: 1,
+          name: "General Admission",
+          description: "Standard entry ticket",
+          price: 100000, // 100,000 IDR in cents
+          availableFrom: "2025-01-01T00:00:00.000Z",
+          availableUntil: "2025-03-10T23:59:59.000Z",
+          maxCapacity: 400,
+          type: "ONLINE"
+        },
+        {
+          id: 2,
+          name: "VIP",
+          description: "Premium entry with reserved seating",
+          price: 250000, // 250,000 IDR in cents
+          availableFrom: "2025-01-01T00:00:00.000Z",
+          availableUntil: "2025-03-10T23:59:59.000Z",
+          maxCapacity: 50,
+          type: "ONLINE"
+        }
+      ],
+      isRegistrationOpen: true
+    };
+
+    setEvent(mockEvent);
+    setLoading(false);
+    
+    // Initialize selected tickets
+    const initialSelection: {[key: number]: number} = {};
+    mockEvent.tickets.forEach(ticket => {
+      initialSelection[ticket.id] = 0;
+    });
+    setSelectedTickets(initialSelection);
+    
+    // Set up countdown timer
+    updateCountdown(mockEvent);
+    const interval = setInterval(() => updateCountdown(mockEvent), 1000);
+    
+    return () => clearInterval(interval);
+  }, [eventId]);
+
+  const updateCountdown = (event: Event) => {
+    const now = new Date();
+    const openDate = new Date(event.registrationOpenDate);
+    const closeDate = new Date(event.registrationCloseDate);
+    
+    let countdownText = "";
+    
+    if (now < openDate) {
+      // Registration not opened yet
+      const diff = openDate.getTime() - now.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      countdownText = `Registration opens in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+    } else if (now >= openDate && now <= closeDate) {
+      // Registration is open
+      const diff = closeDate.getTime() - now.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      countdownText = `Registration ends in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+    } else {
+      // Registration closed
+      countdownText = "Registration closed";
+    }
+    
+    setCountdown(countdownText);
+  };
+
+  const handleTicketChange = (ticketId: number, value: number) => {
+    if (value < 0) return;
+    setSelectedTickets(prev => ({
+      ...prev,
+      [ticketId]: value
+    }));
+  };
+
+  const handleRegister = () => {
+    if (!session) {
+      router.push('/auth/sign-in');
+      return;
+    }
+    
+    // Calculate total attendees
+    const totalAttendees = Object.values(selectedTickets).reduce((sum, count) => sum + count, 0);
+    
+    if (totalAttendees === 0) {
+      alert("Please select at least one ticket");
+      return;
+    }
+    
+    // Navigate to registration page with selected tickets
+    router.push(`/events/${eventId}/register`);
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Loading event details...</div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Event not found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-8">
+      <div className="mb-6">
+        <Link href="/events" className="text-sm text-muted-foreground hover:underline">
+          ← Back to Events
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className="aspect-video bg-muted rounded-lg mb-6">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 rounded-lg">
+              <span className="text-2xl text-muted-foreground">Event Banner</span>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">{event.title}</h1>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {event.categories.map((cat, index) => (
+                <Badge key={index} variant="secondary">
+                  {cat.category.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="prose max-w-none mb-8">
+            <p className="text-lg text-muted-foreground">{event.description}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="flex items-center">
+              <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
+              <div>
+                <p className="text-sm text-muted-foreground">Event Date</p>
+                <p className="font-medium">
+                  {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <MapPin className="h-5 w-5 text-muted-foreground mr-2" />
+              <div>
+                <p className="text-sm text-muted-foreground">Location</p>
+                <p className="font-medium">{event.location}</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Clock className="h-5 w-5 text-muted-foreground mr-2" />
+              <div>
+                <p className="text-sm text-muted-foreground">Registration</p>
+                <p className="font-medium">{countdown}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Tickets</h2>
+            <div className="space-y-4">
+              {event.tickets.map(ticket => (
+                <Card key={ticket.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-xl">{ticket.name}</CardTitle>
+                        {ticket.description && (
+                          <CardDescription className="mt-1">{ticket.description}</CardDescription>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">
+                          Rp. {(ticket.price / 100).toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleTicketChange(ticket.id, selectedTickets[ticket.id] - 1)}
+                          disabled={selectedTickets[ticket.id] <= 0}
+                        >
+                          -
+                        </Button>
+                        <span className="text-lg w-8 text-center">{selectedTickets[ticket.id]}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleTicketChange(ticket.id, selectedTickets[ticket.id] + 1)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {ticket.maxCapacity} available
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Registration</CardTitle>
+              <CardDescription>
+                Select tickets and register for this event
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Object.entries(selectedTickets).map(([ticketId, count]) => {
+                  const ticket = event.tickets.find(t => t.id === parseInt(ticketId));
+                  if (!ticket || count <= 0) return null;
+                  
+                  return (
+                    <div key={ticketId} className="flex justify-between text-sm">
+                      <span>{ticket.name} x{count}</span>
+                      <span>Rp. {((ticket.price * count) / 100).toLocaleString('id-ID')}</span>
+                    </div>
+                  );
+                })}
+                
+                {event.adminFee > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span>Admin Fee</span>
+                    <span>Rp. {(event.adminFee / 100).toLocaleString('id-ID')}</span>
+                  </div>
+                )}
+                
+                <div className="border-t pt-2">
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>
+                      Rp. {(
+                        Object.entries(selectedTickets).reduce((sum, [ticketId, count]) => {
+                          const ticket = event.tickets.find(t => t.id === parseInt(ticketId));
+                          return sum + (ticket ? ticket.price * count : 0);
+                        }, 0) + event.adminFee
+                      ).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="w-full mt-4" 
+                  onClick={handleRegister}
+                  disabled={!event.isRegistrationOpen}
+                >
+                  {event.isRegistrationOpen ? "Register Now" : "Registration Closed"}
+                </Button>
+                
+                {!event.isRegistrationOpen && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Registration is currently closed
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

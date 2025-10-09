@@ -1,3 +1,15 @@
+/**
+ * Interface representing a subscription plan
+ * 
+ * @interface Plan
+ * @property {number} id - Unique identifier for the plan
+ * @property {string} name - Name of the plan
+ * @property {string} priceId - Stripe price ID for the plan
+ * @property {any} limits - Limitations associated with the plan
+ * @property {string[]} features - List of features included in the plan
+ * @property {number} price - Price of the plan
+ * @property {number} trialDays - Number of trial days for the plan
+ */
 export interface Plan {
     id: number,
     name: string,
@@ -8,6 +20,12 @@ export interface Plan {
     trialDays: number
   }
   
+  /**
+   * Array of available subscription plans
+   * 
+   * This array contains all the subscription plans available for users
+   * @type {Plan[]}
+   */
   export const plans: Plan[] = [
     {
       id: 1,
