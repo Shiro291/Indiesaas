@@ -1,32 +1,30 @@
 import { NextRequest } from "next/server";
-import { cookies } from "next/headers";
 import { registrationService } from "@/lib/services/registration.service";
-import { checkAdminAccess } from "@/lib/admin-auth";
-import { auth } from "@/lib/auth";
 
 /**
  * GET /api/admin/events/[id]/registrations
  * 
- * Retrieve all registrations for a specific event with optional filters
+ * Retrieve registrations for a specific event with optional filtering
  * 
  * @param {NextRequest} request - The incoming request object
  * @param {Object} params - URL parameters
  * @param {string} params.id - The event ID as a string
- * @returns {Response} A JSON response containing the list of registrations for the event
+ * @returns {Response} A JSON response containing the list of registrations and metadata
  * 
  * Path Parameters:
  * - id: The numeric ID of the event
  * 
  * Query Parameters:
- * - secretKey: Admin secret key for authentication
- * - ageCategory: Optional filter for age category
- * - beltLevel: Optional filter for belt level
+ * - ageCategory: Optional filter for attendee age category (TK, SD, SMP, SMA)
+ * - beltLevel: Optional filter for attendee belt level (DASAR, MC_I, MC_II, MC_III, MC_IV)
+ * - status: Optional filter for registration status (PENDING, CONFIRMED, CANCELLED)
+ * - paymentStatus: Optional filter for payment status (PENDING, PAID, FAILED)
+ * - page: Optional page number for pagination (default: 1)
+ * - limit: Optional limit for pagination (default: 10)
  * 
  * Response:
- * - 200: Success - Returns array of registrations for the event
- * - 400: Bad request - Invalid event ID
- * - 401: Unauthorized - User not authenticated
- * - 403: Forbidden - Invalid admin credentials
+ * - 200: Success - Returns array of registrations with pagination metadata
+ * - 400: Bad request - Invalid event ID or query parameters
  * - 500: Server error - Returns error message
  */
 export async function GET(
@@ -34,45 +32,35 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check authentication - use cookies() helper for reliable cookie handling
-    const cookieStore = cookies();
-    const headersInstance = new Headers();
-    headersInstance.append('cookie', cookieStore.toString());
-    
-    const session = await auth.api.getSession({
-      headers: headersInstance
-    });
-
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Verify admin access
-    const { searchParams } = new URL(request.url);
-    const secretKey = searchParams.get("secretKey");
-    
-    if (!secretKey || !checkAdminAccess(secretKey)) {
-      return Response.json({ error: "Invalid admin credentials" }, { status: 403 });
-    }
-
     const eventId = parseInt(params.id);
     if (isNaN(eventId)) {
       return Response.json({ error: "Invalid event ID" }, { status: 400 });
     }
 
-    const { searchParams: urlParams } = new URL(request.url);
-    const ageCategory = urlParams.get("ageCategory") || undefined;
-    const beltLevel = urlParams.get("beltLevel") || undefined;
+    const { searchParams } = new URL(request.url);
+    const ageCategory = searchParams.get("ageCategory") || undefined;
+    const beltLevel = searchParams.get("beltLevel") || undefined;
+    const status = searchParams.get("status") || undefined;
+    const paymentStatus = searchParams.get("paymentStatus") || undefined;
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
 
-    const registrations = await registrationService.getEventRegistrations(
+    // Get registrations with filters
+    const result = await registrationService.getEventRegistrations(
       eventId,
-      ageCategory,
-      beltLevel
+      {
+        ageCategory,
+        beltLevel,
+        status,
+        paymentStatus,
+        page,
+        limit
+      }
     );
 
-    return Response.json({ registrations });
-  } catch (error) {
+    return Response.json(result);
+  } catch (error: any) {
     console.error("Error fetching event registrations:", error);
-    return Response.json({ error: "Failed to fetch registrations" }, { status: 500 });
+    return Response.json({ error: error.message || "Failed to fetch event registrations" }, { status: 500 });
   }
 }

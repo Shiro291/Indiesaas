@@ -4,56 +4,29 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Calendar, MapPin, Users } from "lucide-react";
 
-// Mock data for events
-const mockEvents = [
-  {
-    id: 1,
-    title: "Pencak Silat Championship 2025",
-    description: "Annual championship for Pencak Silat practitioners of all levels",
-    startDate: new Date("2025-03-15"),
-    endDate: new Date("2025-03-17"),
-    location: "Jakarta Convention Center",
-    image: "/placeholder-event.jpg",
-    maxCapacity: 500,
-    currentRegistrations: 120,
-    categories: [
-      { category: { name: "Martial Arts" } },
-      { category: { name: "Competition" } }
-    ]
-  },
-  {
-    id: 2,
-    title: "Indonesian Karate Tournament",
-    description: "National karate tournament for junior and senior categories",
-    startDate: new Date("2025-04-20"),
-    endDate: new Date("2025-04-22"),
-    location: "Gelora Bung Karno",
-    image: "/placeholder-event.jpg",
-    maxCapacity: 300,
-    currentRegistrations: 80,
-    categories: [
-      { category: { name: "Karate" } },
-      { category: { name: "Competition" } }
-    ]
-  },
-  {
-    id: 3,
-    title: "Taekwondo Youth Cup",
-    description: "International youth taekwondo competition",
-    startDate: new Date("2025-05-10"),
-    endDate: new Date("2025-05-12"),
-    location: "Indonesia Arena",
-    image: "/placeholder-event.jpg",
-    maxCapacity: 200,
-    currentRegistrations: 150,
-    categories: [
-      { category: { name: "Taekwondo" } },
-      { category: { name: "Youth" } }
-    ]
+// Fetch events from the API
+async function getEvents() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/events`, {
+      cache: "no-store" // Disable caching for fresh data
+    });
+    
+    if (!response.ok) {
+      console.error("Failed to fetch events:", response.statusText);
+      return [];
+    }
+    
+    const data = await response.json();
+    return data.events || [];
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return [];
   }
-];
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const events = await getEvents();
+
   return (
     <div className="container py-8">
       <div className="mb-12 text-center">
@@ -66,62 +39,70 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockEvents.map((event) => (
-          <Card key={event.id} className="overflow-hidden">
-            <div className="aspect-video bg-muted">
-              {event.image ? (
-                <img 
-                  src={event.image} 
-                  alt={event.title} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-muted-foreground">No image</span>
-                </div>
-              )}
-            </div>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{event.title}</CardTitle>
-                <Badge variant="secondary">
-                  {Math.round((event.currentRegistrations / event.maxCapacity) * 100)}% Full
-                </Badge>
+        {events.length > 0 ? (
+          events.map((event: any) => (
+            <Card key={event.id} className="overflow-hidden">
+              <div className="aspect-video bg-muted">
+                {event.image ? (
+                  <img 
+                    src={event.image} 
+                    alt={event.title} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-muted-foreground">No image</span>
+                  </div>
+                )}
               </div>
-              <CardDescription className="line-clamp-2">
-                {event.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {event.categories.map((cat, index) => (
-                  <Badge key={index} variant="outline">
-                    {cat.category.name}
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{event.title}</CardTitle>
+                  <Badge variant="secondary">
+                    {event.maxCapacity > 0 
+                      ? `${Math.round((event.currentRegistrations / event.maxCapacity) * 100)}% Full`
+                      : "Limited"}
                   </Badge>
-                ))}
-              </div>
-              
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {event.startDate.toLocaleDateString()} - {event.endDate.toLocaleDateString()}
                 </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="mr-2 h-4 w-4" />
-                  {event.location}
+                <CardDescription className="line-clamp-2">
+                  {event.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {event.categories.map((cat: any, index: number) => (
+                    <Badge key={index} variant="outline">
+                      {cat.category.name}
+                    </Badge>
+                  ))}
                 </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="mr-2 h-4 w-4" />
-                  {event.currentRegistrations} of {event.maxCapacity} registered
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    {event.location}
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="mr-2 h-4 w-4" />
+                    {event.currentRegistrations} of {event.maxCapacity} registered
+                  </div>
                 </div>
-              </div>
-              
-              <Button asChild className="w-full">
-                <Link href={`/events/${event.id}`}>View Details</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                
+                <Button asChild className="w-full">
+                  <Link href={`/events/${event.id}`}>View Details</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-lg text-muted-foreground">No events available at the moment.</p>
+          </div>
+        )}
       </div>
     </div>
   );

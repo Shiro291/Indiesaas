@@ -307,6 +307,235 @@ export class RegistrationService {
   }
 
   /**
+   * Add attendees to an existing registration
+   */
+  async addAttendeesToRegistration(request: {
+    registrationId: number;
+    attendeesData: {
+      fullName: string;
+      gender: string;
+      ageCategory: string;
+      beltLevel: string;
+      phoneNumber: string;
+      biodataUrl?: string;
+      consentUrl?: string;
+    }[];
+  }) {
+    return await db.transaction(async (tx) => {
+      // Get the registration to verify it exists
+      const registration = await tx
+        .select()
+        .from(registrations)
+        .where(eq(registrations.id, request.registrationId))
+        .limit(1);
+
+      if (registration.length === 0) {
+        throw new Error("Registration not found");
+      }
+
+      // Add each attendee to the registration
+      for (const attendeeData of request.attendeesData) {
+        await tx.insert(attendees).values({
+          registrationId: request.registrationId,
+          fullName: attendeeData.fullName,
+          gender: attendeeData.gender,
+          ageCategory: attendeeData.ageCategory,
+          beltLevel: attendeeData.beltLevel,
+          phoneNumber: attendeeData.phoneNumber,
+          biodataUrl: attendeeData.biodataUrl,
+          consentUrl: attendeeData.consentUrl,
+          // For now, we'll assign a default ticket ID since we don't have a specific ticket assignment
+          ticketId: 0, // This would need to be properly implemented in a real scenario
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      return await this.getRegistrationDetails(request.registrationId);
+    });
+  }
+
+  /**
+   * Process payment for an existing registration
+   */
+  async processRegistrationPayment(request: {
+    registrationId: number;
+    paymentMethod: "ONLINE" | "OFFLINE";
+  }) {
+    return await db.transaction(async (tx) => {
+      // Get the registration to process
+      const registration = await tx.query.registrations.findFirst({
+        where: eq(registrations.id, request.registrationId),
+        with: {
+          event: {
+            columns: {
+              title: true
+            }
+          },
+          user: {
+            columns: {
+              name: true,
+              email: true
+            }
+          }
+        }
+      });
+
+      if (!registration) {
+        throw new Error("Registration not found");
+      }
+
+      if (request.paymentMethod === "ONLINE" && registration.totalAmount > 0) {
+        // Prepare Ipaymu transaction
+        const ipaymuRequest = {
+          product: [`Event Registration: ${registration.event.title}`],
+          qty: [1],
+          price: [registration.totalAmount],
+          amount: registration.totalAmount,
+          note: `Registration for ${registration.event.title}`,
+          name: registration.user.name,
+          email: registration.user.email,
+          phone: registration.attendees.length > 0 ? registration.attendees[0].phoneNumber : "", // Use first attendee's phone
+          returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/registration/${request.registrationId}/status`,
+          notifyUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/ipaymu-callback`,
+        };
+
+        const paymentResponse = await ipaymuService.createTransaction(ipaymuRequest);
+
+        // Update registration with payment info
+        await tx
+          .update(registrations)
+          .set({
+            paymentId: paymentResponse.KodeTransaksi,
+            paymentMethod: request.paymentMethod,
+            paymentStatus: "PENDING", // Payment status will be updated by callback
+            updatedAt: new Date()
+          })
+          .where(eq(registrations.id, request.registrationId));
+
+        return {
+          registrationId: request.registrationId,
+          paymentUrl: paymentResponse.PaymentUrl,
+          registrationNumber: registration.registrationNumber
+        };
+      } else {
+        // For offline payment or free events, update the payment method and keep status as pending
+        await tx
+          .update(registrations)
+          .set({
+            paymentMethod: request.paymentMethod,
+            updatedAt: new Date()
+          })
+          .where(eq(registrations.id, request.registrationId));
+
+        return {
+          registrationId: request.registrationId,
+          registrationNumber: registration.registrationNumber
+        };
+      }
+    });
+  }
+
+  /**
+   * Get registrations for an event with filters and pagination
+   */
+  async getEventRegistrations(
+    eventId: number,
+    filters?: {
+      ageCategory?: string;
+      beltLevel?: string;
+      status?: string;
+      paymentStatus?: string;
+      page?: number;
+      limit?: number;
+    }
+  ) {
+    const { ageCategory, beltLevel, status, paymentStatus, page = 1, limit = 10 } = filters || {};
+    
+    let whereClause = eq(registrations.eventId, eventId);
+    if (status) {
+      whereClause = and(whereClause, eq(registrations.status, status));
+    }
+    if (paymentStatus) {
+      whereClause = and(whereClause, eq(registrations.paymentStatus, paymentStatus));
+    }
+
+    const offset = (page - 1) * limit;
+
+    const registrationsResult = await db.query.registrations.findMany({
+      where: whereClause,
+      with: {
+        attendees: {
+          where: (attendeeFilters => {
+            let attendeeWhereClause = eq(attendeeFilters.registrationId, registrations.id);
+            if (ageCategory) {
+              attendeeWhereClause = and(attendeeWhereClause, eq(attendeeFilters.ageCategory, ageCategory));
+            }
+            if (beltLevel) {
+              attendeeWhereClause = and(attendeeWhereClause, eq(attendeeFilters.beltLevel, beltLevel));
+            }
+            return attendeeWhereClause;
+          }),
+          with: {
+            ticket: true
+          }
+        },
+        user: {
+          columns: {
+            name: true,
+            email: true
+          }
+        }
+      },
+      limit: limit,
+      offset: offset
+    });
+
+    // Get total count for pagination
+    const totalCountResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(registrations)
+      .where(whereClause);
+    const totalCount = totalCountResult[0]?.count || 0;
+
+    return {
+      registrations: registrationsResult,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit)
+      }
+    };
+  }
+
+  /**
+   * Get registrations by user ID
+   */
+  async getRegistrationsByUserId(userId: string) {
+    return await db.query.registrations.findMany({
+      where: eq(registrations.userId, userId),
+      with: {
+        attendees: {
+          with: {
+            ticket: true
+          }
+        },
+        event: {
+          with: {
+            categories: {
+              with: {
+                category: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: (registrations, { desc }) => [desc(registrations.createdAt)]
+    });
+  }
+
+  /**
    * Export registrations to CSV format
    */
   async exportRegistrationsToCSV(eventId: number) {

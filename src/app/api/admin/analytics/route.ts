@@ -1,74 +1,47 @@
 import { NextRequest } from "next/server";
-import { cookies } from "next/headers";
-import { eventService } from "@/lib/services/event.service";
-import { checkAdminAccess } from "@/lib/admin-auth";
-import { auth } from "@/lib/auth";
+import { analyticsService } from "@/lib/services/analytics.service";
 
 /**
  * GET /api/admin/analytics
  * 
- * Retrieve analytics data for admin dashboard
+ * Retrieve dashboard analytics data for admin panel
  * 
  * @param {NextRequest} request - The incoming request object
  * @returns {Response} A JSON response containing analytics data
  * 
  * Query Parameters:
- * - secretKey: Admin secret key for authentication
+ * - period: Time period for analytics ("week", "month", "quarter", "year") - default: "month"
+ * - startDate: Optional start date for custom period (ISO string)
+ * - endDate: Optional end date for custom period (ISO string)
  * 
  * Response:
- * - 200: Success - Returns analytics data including event counts and placeholder revenue
- * - 401: Unauthorized - User not authenticated
- * - 403: Forbidden - Invalid admin credentials
+ * - 200: Success - Returns analytics data with KPIs, trends, and charts
+ * - 400: Bad request - Invalid query parameters
  * - 500: Server error - Returns error message
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication - use cookies() helper for reliable cookie handling
-    const cookieStore = cookies();
-    const headersInstance = new Headers();
-    headersInstance.append('cookie', cookieStore.toString());
-    
-    const session = await auth.api.getSession({
-      headers: headersInstance
+    const { searchParams } = new URL(request.url);
+    const period = searchParams.get("period") || "month";
+    const startDate = searchParams.get("startDate") || undefined;
+    const endDate = searchParams.get("endDate") || undefined;
+
+    // Validate period parameter
+    const validPeriods = ["week", "month", "quarter", "year", "custom"];
+    if (!validPeriods.includes(period) && !(startDate && endDate)) {
+      return Response.json({ error: "Invalid period or missing custom date range" }, { status: 400 });
+    }
+
+    // Get analytics data
+    const analytics = await analyticsService.getDashboardAnalytics({
+      period: startDate && endDate ? "custom" : period,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined
     });
 
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Verify admin access
-    const { searchParams } = new URL(request.url);
-    const secretKey = searchParams.get("secretKey");
-    
-    if (!secretKey || !checkAdminAccess(secretKey)) {
-      return Response.json({ error: "Invalid admin credentials" }, { status: 403 });
-    }
-
-    // For now, we'll return a simple analytics response
-    // In a real application, you'd implement more complex analytics
-    const events = await eventService.getAdminEvents();
-    let totalRevenue = 0;
-    let totalRegistrations = 0;
-    
-    // This is simplified - in real implementation you'd get from eventStatistics table
-    for (const event of events) {
-      // In a real app you'd query eventStatistics table for accurate data
-      // For now, just return placeholder data
-    }
-
-    const analytics = {
-      totalEvents: events.length,
-      totalRevenue: 0, // Placeholder - would come from eventStatistics
-      totalRegistrations: 0, // Placeholder - would come from eventStatistics
-      eventsByStatus: {
-        active: events.filter(e => e.status === "ACTIVE").length,
-        archived: events.filter(e => e.status === "ARCHIVED").length
-      }
-    };
-
-    return Response.json({ analytics });
-  } catch (error) {
+    return Response.json(analytics);
+  } catch (error: any) {
     console.error("Error fetching analytics:", error);
-    return Response.json({ error: "Failed to fetch analytics" }, { status: 500 });
+    return Response.json({ error: error.message || "Failed to fetch analytics" }, { status: 500 });
   }
 }

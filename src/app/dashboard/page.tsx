@@ -46,65 +46,30 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real application, this would fetch user's registrations
-    // For this example, using mock data
-    setTimeout(() => {
-      setRegistrations([
-        {
-          id: 1,
-          registrationNumber: "REG-12345-ABC",
-          event: {
-            id: 1,
-            title: "Pencak Silat Championship 2025",
-            description: "Annual championship for Pencak Silat practitioners of all levels",
-            startDate: "2025-03-15T09:00:00.000Z",
-            endDate: "2025-03-17T18:00:00.000Z",
-            location: "Jakarta Convention Center",
-            maxCapacity: 500,
-            currentRegistrations: 120,
-            categories: [
-              { category: { name: "Martial Arts" } },
-              { category: { name: "Competition" } }
-            ]
-          },
-          status: "CONFIRMED",
-          paymentStatus: "PAID",
-          totalAmount: 115000, // 115,000 IDR in cents
-          createdAt: "2024-12-10T10:30:00.000Z",
-          attendees: [
-            { fullName: "John Doe", ageCategory: "SMA", beltLevel: "MC_I" },
-            { fullName: "Jane Smith", ageCategory: "SMP", beltLevel: "DASAR" }
-          ]
-        },
-        {
-          id: 2,
-          registrationNumber: "REG-67890-DEF",
-          event: {
-            id: 2,
-            title: "Indonesian Karate Tournament",
-            description: "National karate tournament",
-            startDate: "2025-04-20T09:00:00.000Z",
-            endDate: "2025-04-22T18:00:00.000Z",
-            location: "Gelora Bung Karno",
-            maxCapacity: 300,
-            currentRegistrations: 80,
-            categories: [
-              { category: { name: "Karate" } },
-              { category: { name: "Competition" } }
-            ]
-          },
-          status: "PENDING",
-          paymentStatus: "PENDING",
-          totalAmount: 250000, // 250,000 IDR in cents
-          createdAt: "2024-12-15T14:20:00.000Z",
-          attendees: [
-            { fullName: "Bob Johnson", ageCategory: "SMA", beltLevel: "MC_II" }
-          ]
+    // Fetch user's registrations from API
+    const fetchRegistrations = async () => {
+      if (!session) return;
+      
+      try {
+        const response = await fetch(`/api/dashboard/registrations`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch registrations');
         }
-      ]);
-      setLoading(false);
-    }, 500);
-  }, []);
+        const data = await response.json();
+        setRegistrations(data.registrations || []);
+      } catch (error) {
+        console.error("Error fetching registrations:", error);
+        // For now, we'll set an empty array, but in a real app you might want to show an error message
+        setRegistrations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (session) {
+      fetchRegistrations();
+    }
+  }, [session]);
 
   if (!session) {
     return (

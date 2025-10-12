@@ -50,63 +50,38 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const router = useRouter();
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    // For now, using mock data
-    const mockEvent: Event = {
-      id: eventId,
-      title: "Pencak Silat Championship 2025",
-      description: "Annual championship for Pencak Silat practitioners of all levels. This prestigious event will feature the best fighters from across Indonesia and international guests.",
-      startDate: "2025-03-15T09:00:00.000Z",
-      endDate: "2025-03-17T18:00:00.000Z",
-      registrationOpenDate: "2025-01-01T00:00:00.000Z",
-      registrationCloseDate: "2025-03-10T23:59:59.000Z",
-      location: "Jakarta Convention Center",
-      maxCapacity: 500,
-      adminFee: 15000, // 15,000 IDR in cents
-      categories: [
-        { category: { name: "Martial Arts" } },
-        { category: { name: "Competition" } }
-      ],
-      tickets: [
-        {
-          id: 1,
-          name: "General Admission",
-          description: "Standard entry ticket",
-          price: 100000, // 100,000 IDR in cents
-          availableFrom: "2025-01-01T00:00:00.000Z",
-          availableUntil: "2025-03-10T23:59:59.000Z",
-          maxCapacity: 400,
-          type: "ONLINE"
-        },
-        {
-          id: 2,
-          name: "VIP",
-          description: "Premium entry with reserved seating",
-          price: 250000, // 250,000 IDR in cents
-          availableFrom: "2025-01-01T00:00:00.000Z",
-          availableUntil: "2025-03-10T23:59:59.000Z",
-          maxCapacity: 50,
-          type: "ONLINE"
+    // Fetch event data from API
+    const fetchEvent = async () => {
+      try {
+        const response = await fetch(`/api/events/${eventId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch event');
         }
-      ],
-      isRegistrationOpen: true
+        const data = await response.json();
+        const fetchedEvent = data.event;
+        
+        setEvent(fetchedEvent);
+        setLoading(false);
+        
+        // Initialize selected tickets
+        const initialSelection: {[key: number]: number} = {};
+        fetchedEvent.tickets.forEach((ticket: any) => {
+          initialSelection[ticket.id] = 0;
+        });
+        setSelectedTickets(initialSelection);
+        
+        // Set up countdown timer
+        updateCountdown(fetchedEvent);
+        const interval = setInterval(() => updateCountdown(fetchedEvent), 1000);
+        
+        return () => clearInterval(interval);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+        setLoading(false);
+      }
     };
-
-    setEvent(mockEvent);
-    setLoading(false);
     
-    // Initialize selected tickets
-    const initialSelection: {[key: number]: number} = {};
-    mockEvent.tickets.forEach(ticket => {
-      initialSelection[ticket.id] = 0;
-    });
-    setSelectedTickets(initialSelection);
-    
-    // Set up countdown timer
-    updateCountdown(mockEvent);
-    const interval = setInterval(() => updateCountdown(mockEvent), 1000);
-    
-    return () => clearInterval(interval);
+    fetchEvent();
   }, [eventId]);
 
   const updateCountdown = (event: Event) => {

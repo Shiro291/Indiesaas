@@ -10,26 +10,32 @@ export default function RegistrationStatusPage({ params }: { params: { id: strin
   const registrationId = params.id;
   const [registration, setRegistration] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real application, you would fetch registration details from the API
-    // For this example, we'll simulate with mock data
-    setTimeout(() => {
-      setRegistration({
-        id: registrationId,
-        registrationNumber: "REG-12345-ABC",
-        eventName: "Pencak Silat Championship 2025",
-        eventDate: "2025-03-15",
-        totalAmount: 115000, // 115,000 IDR in cents
-        paymentStatus: "PENDING", // Options: PENDING, PAID, FAILED
-        status: "PENDING", // Options: PENDING, CONFIRMED, CANCELLED
-        attendees: [
-          { fullName: "John Doe", ageCategory: "SMA", beltLevel: "MC_I" },
-          { fullName: "Jane Smith", ageCategory: "SMP", beltLevel: "DASAR" }
-        ]
-      });
-      setLoading(false);
-    }, 500);
+    // Fetch registration details from API
+    const fetchRegistration = async () => {
+      try {
+        const response = await fetch(`/api/registrations/${registrationId}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Registration not found");
+          } else {
+            setError("Failed to fetch registration details");
+          }
+          return;
+        }
+        const data = await response.json();
+        setRegistration(data.registration);
+      } catch (err) {
+        setError("An error occurred while fetching registration details");
+        console.error("Error fetching registration:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchRegistration();
   }, [registrationId]);
 
   if (loading) {
@@ -142,7 +148,7 @@ export default function RegistrationStatusPage({ params }: { params: { id: strin
             
             {registration.paymentStatus === "PENDING" && (
               <Button asChild variant="outline" className="flex-1">
-                <Link href={`/events/${registrationId}/payment`}>Complete Payment</Link>
+                <Link href={`/events/${registration.eventId}/register`}>Complete Payment</Link>
               </Button>
             )}
             
