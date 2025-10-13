@@ -30,8 +30,11 @@ export default function SubscriptionButton({
             if (activeSub && subId) {
                 // Update existing subscription
                 const loadingToast = toast.loading("Updating subscription...")
-                
-                const result = await updateExistingSubscription(subId, plan.priceId)
+
+                const result = await updateExistingSubscription(
+                    subId,
+                    plan.priceId
+                )
                 console.log({ result })
 
                 toast.dismiss(loadingToast)
@@ -44,7 +47,9 @@ export default function SubscriptionButton({
                         router.refresh()
                     }, 3000)
                 } else {
-                    toast.error(result.message || "Failed to update subscription")
+                    toast.error(
+                        result.message || "Failed to update subscription"
+                    )
                 }
             } else {
                 // Create new subscription
@@ -53,7 +58,7 @@ export default function SubscriptionButton({
                     successUrl: "/dashboard/billing",
                     cancelUrl: "/dashboard/billing"
                 })
-                
+
                 if (error) {
                     console.log(error)
                     toast.error("Failed to create subscription")
@@ -68,11 +73,8 @@ export default function SubscriptionButton({
     }
 
     return (
-        <Button
-            onClick={handleSubscription}
-            disabled={isPending}
-        >
+        <Button onClick={handleSubscription} disabled={isPending}>
             {isPending ? "Processing..." : buttonText}
         </Button>
     )
-} 
+}

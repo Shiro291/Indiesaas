@@ -10,13 +10,13 @@ const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 /**
  * Get the currently active subscription for the authenticated user
- * 
+ *
  * This function retrieves the active subscription for the currently logged-in user
  * using Better Auth's session and subscription management.
- * 
- * @returns {Promise<{status: boolean, message?: string, subscription: Subscription | null}>} 
+ *
+ * @returns {Promise<{status: boolean, message?: string, subscription: Subscription | null}>}
  * An object containing the subscription status and details
- * 
+ *
  * @throws No direct throws, but returns error status in the response object
  */
 export async function getActiveSubscription(): Promise<{
@@ -60,15 +60,15 @@ export async function getActiveSubscription(): Promise<{
 
 /**
  * Update an existing subscription to a different price plan
- * 
+ *
  * This function allows users to switch their subscription from one price tier to another
  * using the Stripe API.
- * 
+ *
  * @param {string} subId - The ID of the existing subscription to update
  * @param {string} switchToPriceId - The ID of the new price plan to switch to
- * @returns {Promise<{status: boolean, message: string}>} 
+ * @returns {Promise<{status: boolean, message: string}>}
  * An object containing the update status and a message
- * 
+ *
  * @throws No direct throws, but returns error status in the response object
  */
 export async function updateExistingSubscription(

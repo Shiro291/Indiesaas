@@ -264,13 +264,12 @@ export const FooterSection = () => {
                         <div className="flex flex-col justify-between gap-4 lg:flex-row">
                             <div className="flex flex-col items-center gap-4 text-muted-foreground text-sm sm:flex-row">
                                 <p>
-                                    &copy; 2025 {site.name}. All rights reserved.
+                                    &copy; 2025 {site.name}. All rights
+                                    reserved.
                                 </p>
                             </div>
 
                             <div className="flex flex-col items-center gap-3 lg:flex-row lg:gap-6">
-                               
-                                
                                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                                     <span>Sponsored by</span>
                                     <Link

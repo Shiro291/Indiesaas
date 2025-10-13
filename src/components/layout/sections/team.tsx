@@ -19,13 +19,11 @@ interface SocialNetworkProps {
 export const TeamSection = () => {
     const teamList: TeamProps[] = [
         {
-            imageUrl:
-                "/avatar-placeholder.png",
+            imageUrl: "/avatar-placeholder.png",
             firstName: "EventTS",
             lastName: "Dev Team",
             positions: ["Fullstack Developer", "Event Management Platform"],
             socialNetworks: [
-                
                 {
                     name: "Github",
                     url: "https://github.com/eventts/eventts"

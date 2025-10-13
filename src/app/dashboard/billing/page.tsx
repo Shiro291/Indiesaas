@@ -171,9 +171,9 @@ export default async function Plans() {
                                     </CardHeader>
                                     <CardContent className="text-center">
                                         <p className="mb-4 text-muted-foreground">
-                                            Choose a plan from the subscription tab.
+                                            Choose a plan from the subscription
+                                            tab.
                                         </p>
-                                        
                                     </CardContent>
                                 </Card>
                             )}

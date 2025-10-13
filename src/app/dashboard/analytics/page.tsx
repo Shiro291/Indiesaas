@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
-            <PageHeader 
+            <PageHeader
                 title="Analytics page"
                 description="View detailed analytics and insights about your data."
             />

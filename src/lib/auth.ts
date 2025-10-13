@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { headers } from "next/headers"
 import { EmailTemplate } from "@daveyplate/better-auth-ui/server"
 import React from "react"
 import { db } from "@/database/db"
@@ -10,13 +9,13 @@ import nodemailer from "nodemailer"
 
 /**
  * Better Auth instance with database integration and email/social authentication
- * 
+ *
  * This configuration sets up authentication with:
  * - PostgreSQL database using Drizzle ORM adapter
  * - Email and password authentication
  * - Social authentication (GitHub, Google, Twitter)
  * - Password reset email functionality
- * 
+ *
  * @type {any} auth - The Better Auth instance
  */
 export const auth = betterAuth({
@@ -32,12 +31,12 @@ export const auth = betterAuth({
 
             // Create Nodemailer transporter
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
+                service: "gmail",
                 auth: {
                     user: process.env.GMAIL_USER,
                     pass: process.env.GMAIL_APP_PASSWORD
                 }
-            });
+            })
 
             // Send email using Nodemailer
             await transporter.sendMail({
@@ -68,7 +67,7 @@ export const auth = betterAuth({
                     baseUrl: site.url,
                     imageUrl: `${site.url}/logo.png`
                 }).toString()
-            });
+            })
         }
     },
     socialProviders: {
@@ -89,17 +88,17 @@ export const auth = betterAuth({
 
 /**
  * Get the currently active subscription for the authenticated user
- * 
+ *
  * This function retrieves the active subscription for the currently logged-in user
  * from the Better Auth API.
- * 
+ *
  * @returns {Promise<any>} The active subscription object or undefined if none exists
- * 
+ *
  * @throws No direct throws, but may have errors in the Better Auth API call
  */
 export async function getActiveSubscription() {
     // Note: This function was referencing a non-existent API method 'listActiveSubscriptions'
     // In a real implementation, you would query your database for subscription information
     // For example, querying a subscriptions table for active subscriptions for the current user
-    return null; // Placeholder implementation
+    return null // Placeholder implementation
 }

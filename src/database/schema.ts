@@ -1,4 +1,13 @@
-import { pgTable, text, timestamp, boolean, integer, serial, varchar, pgEnum, json } from "drizzle-orm/pg-core";
+import {
+    pgTable,
+    text,
+    timestamp,
+    boolean,
+    integer,
+    serial,
+    pgEnum,
+    json
+} from "drizzle-orm/pg-core"
 
 /**
  * Enum definitions for the event management system
@@ -8,49 +17,69 @@ import { pgTable, text, timestamp, boolean, integer, serial, varchar, pgEnum, js
  * Event status enum defining possible states for events
  * @enum {string}
  */
-export const eventStatusEnum = pgEnum("event_status", ["ACTIVE", "ARCHIVED"]);
+export const eventStatusEnum = pgEnum("event_status", ["ACTIVE", "ARCHIVED"])
 
 /**
  * Registration status enum defining possible states for event registrations
  * @enum {string}
  */
-export const registrationStatusEnum = pgEnum("registration_status", ["PENDING", "CONFIRMED", "CANCELLED"]);
+export const registrationStatusEnum = pgEnum("registration_status", [
+    "PENDING",
+    "CONFIRMED",
+    "CANCELLED"
+])
 
 /**
  * Payment method enum defining possible payment methods
  * @enum {string}
  */
-export const paymentMethodEnum = pgEnum("payment_method", ["ONLINE", "OFFLINE"]);
+export const paymentMethodEnum = pgEnum("payment_method", ["ONLINE", "OFFLINE"])
 
 /**
  * Payment status enum defining possible states for payments
  * @enum {string}
  */
-export const paymentStatusEnum = pgEnum("payment_status", ["PENDING", "PAID", "FAILED", "REFUNDED"]);
+export const paymentStatusEnum = pgEnum("payment_status", [
+    "PENDING",
+    "PAID",
+    "FAILED",
+    "REFUNDED"
+])
 
 /**
  * Age category enum defining possible age categories for attendees
  * @enum {string}
  */
-export const ageCategoryEnum = pgEnum("age_category", ["TK", "SD", "SMP", "SMA"]);
+export const ageCategoryEnum = pgEnum("age_category", [
+    "TK",
+    "SD",
+    "SMP",
+    "SMA"
+])
 
 /**
  * Belt level enum defining possible belt levels for martial arts events
  * @enum {string}
  */
-export const beltLevelEnum = pgEnum("belt_level", ["DASAR", "MC_I", "MC_II", "MC_III", "MC_IV"]);
+export const beltLevelEnum = pgEnum("belt_level", [
+    "DASAR",
+    "MC_I",
+    "MC_II",
+    "MC_III",
+    "MC_IV"
+])
 
 /**
  * Ticket type enum defining possible ticket types
  * @enum {string}
  */
-export const ticketTypeEnum = pgEnum("ticket_type", ["ONLINE", "ONSITE"]);
+export const ticketTypeEnum = pgEnum("ticket_type", ["ONLINE", "ONSITE"])
 
 /**
  * Users table schema
- * 
+ *
  * Stores user account information for authentication and profile management
- * 
+ *
  * @property {string} id - Unique identifier for the user (text, primary key)
  * @property {string} name - User's full name (text, not null)
  * @property {string} email - User's email address (text, not null, unique)
@@ -79,13 +108,13 @@ export const users = pgTable("users", {
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull(),
     stripeCustomerId: text("stripe_customer_id")
-});
+})
 
 /**
  * Categories table schema
- * 
+ *
  * Stores event category information for organizing events
- * 
+ *
  * @property {number} id - Serial identifier for the category (serial, primary key)
  * @property {string} name - Category name (text, not null)
  * @property {string} description - Category description (text, optional)
@@ -102,13 +131,13 @@ export const categories = pgTable("categories", {
     updatedAt: timestamp("updated_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Events table schema
- * 
+ *
  * Stores event information and metadata
- * 
+ *
  * @property {number} id - Serial identifier for the event (serial, primary key)
  * @property {string} title - Event title (text, not null)
  * @property {string} description - Event description (text, not null)
@@ -145,13 +174,13 @@ export const events = pgTable("events", {
     updatedAt: timestamp("updated_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Event-Categories junction table schema
- * 
+ *
  * Links events to categories (many-to-many relationship)
- * 
+ *
  * @property {number} id - Serial identifier for the relationship (serial, primary key)
  * @property {number} eventId - Reference to events table (integer, not null, foreign key, cascade delete)
  * @property {number} categoryId - Reference to categories table (integer, not null, foreign key, cascade delete)
@@ -164,13 +193,13 @@ export const eventCategories = pgTable("event_categories", {
     categoryId: integer("category_id")
         .notNull()
         .references(() => categories.id, { onDelete: "cascade" })
-});
+})
 
 /**
  * Tickets table schema
- * 
+ *
  * Stores ticket types and information for events
- * 
+ *
  * @property {number} id - Serial identifier for the ticket (serial, primary key)
  * @property {number} eventId - Reference to events table (integer, not null, foreign key, cascade delete)
  * @property {string} name - Ticket name (e.g., "General Admission", "VIP") (text, not null)
@@ -201,13 +230,13 @@ export const tickets = pgTable("tickets", {
     updatedAt: timestamp("updated_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Registrations table schema
- * 
+ *
  * Stores user registration information for events
- * 
+ *
  * @property {number} id - Serial identifier for the registration (serial, primary key)
  * @property {number} eventId - Reference to events table (integer, not null, foreign key, cascade delete)
  * @property {string} userId - Reference to users table (text, not null, foreign key, cascade delete)
@@ -235,7 +264,9 @@ export const registrations = pgTable("registrations", {
     totalAmount: integer("total_amount").notNull(), // In cents
     adminFee: integer("admin_fee").notNull(), // In cents
     paymentMethod: paymentMethodEnum("payment_method").notNull(),
-    paymentStatus: paymentStatusEnum("payment_status").default("PENDING").notNull(),
+    paymentStatus: paymentStatusEnum("payment_status")
+        .default("PENDING")
+        .notNull(),
     paymentId: text("payment_id"), // Ipaymu payment ID
     invoiceUrl: text("invoice_url"), // URL to download invoice
     createdAt: timestamp("created_at")
@@ -244,13 +275,13 @@ export const registrations = pgTable("registrations", {
     updatedAt: timestamp("updated_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Attendees table schema
- * 
+ *
  * Stores individual attendee information for registrations
- * 
+ *
  * @property {number} id - Serial identifier for the attendee (serial, primary key)
  * @property {number} registrationId - Reference to registrations table (integer, not null, foreign key, cascade delete)
  * @property {string} fullName - Attendee's full name (text, not null)
@@ -285,13 +316,13 @@ export const attendees = pgTable("attendees", {
     updatedAt: timestamp("updated_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Messages table schema
- * 
+ *
  * Stores bulk messages sent to users or event attendees
- * 
+ *
  * @property {number} id - Serial identifier for the message (serial, primary key)
  * @property {string} title - Message title (text, not null)
  * @property {string} content - Message content (text, not null)
@@ -308,8 +339,9 @@ export const messages = pgTable("messages", {
     senderId: text("sender_id")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    eventId: integer("event_id")
-        .references(() => events.id, { onDelete: "cascade" }), // Optional - can be for all users
+    eventId: integer("event_id").references(() => events.id, {
+        onDelete: "cascade"
+    }), // Optional - can be for all users
     recipientFilter: json("recipient_filter"), // JSON object for filtering recipients (age, belt, etc.)
     sentAt: timestamp("sent_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
@@ -317,13 +349,13 @@ export const messages = pgTable("messages", {
     createdAt: timestamp("created_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Event Statistics table schema
- * 
+ *
  * Stores analytics and statistics for events
- * 
+ *
  * @property {number} id - Serial identifier for the statistics record (serial, primary key)
  * @property {number} eventId - Reference to events table (integer, not null, foreign key, cascade delete)
  * @property {number} totalRevenue - Total revenue in cents (integer, default: 0, not null)
@@ -344,13 +376,13 @@ export const eventStatistics = pgTable("event_statistics", {
     createdAt: timestamp("created_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull()
-});
+})
 
 /**
  * Sessions table schema
- * 
+ *
  * Stores authentication session information
- * 
+ *
  * @property {string} id - Session identifier (text, primary key)
  * @property {Date} expiresAt - Timestamp when the session expires (timestamp, not null)
  * @property {string} token - Session token (text, not null, unique)
@@ -375,9 +407,9 @@ export const sessions = pgTable("sessions", {
 
 /**
  * Accounts table schema
- * 
+ *
  * Stores OAuth account information linked to users
- * 
+ *
  * @property {string} id - Account identifier (text, primary key)
  * @property {string} accountId - External account ID (text, not null)
  * @property {string} providerId - OAuth provider ID (text, not null)
@@ -412,9 +444,9 @@ export const accounts = pgTable("accounts", {
 
 /**
  * Verifications table schema
- * 
+ *
  * Stores verification tokens for actions like email verification
- * 
+ *
  * @property {string} id - Verification identifier (text, primary key)
  * @property {string} identifier - Verification identifier (e.g., email) (text, not null)
  * @property {string} value - Verification value (e.g., token) (text, not null)
@@ -437,9 +469,9 @@ export const verifications = pgTable("verifications", {
 
 /**
  * Subscriptions table schema
- * 
+ *
  * Stores user subscription information
- * 
+ *
  * @property {string} id - Subscription identifier (text, primary key)
  * @property {string} plan - Subscription plan name (text, not null)
  * @property {string} referenceId - Reference ID for the subscription (text, not null)
@@ -454,16 +486,128 @@ export const verifications = pgTable("verifications", {
  * @property {Date} trialEnd - End of trial period (timestamp, optional)
  */
 export const subscriptions = pgTable("subscriptions", {
-    id: text('id').primaryKey(),
-    plan: text('plan').notNull(),
-    referenceId: text('reference_id').notNull(),
-    stripeCustomerId: text('stripe_customer_id'),
-    stripeSubscriptionId: text('stripe_subscription_id'),
-    status: text('status').default("incomplete"),
-    periodStart: timestamp('period_start'),
+    id: text("id").primaryKey(),
+    plan: text("plan").notNull(),
+    referenceId: text("reference_id").notNull(),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    status: text("status").default("incomplete"),
+    periodStart: timestamp("period_start"),
     periodEnd: timestamp("period_end"),
     cancelAtPeriodEnd: boolean("cancel_at_period_end"),
     seats: integer("seats"),
-    trialStart: timestamp('trial_start'),
-    trialEnd: timestamp('trial_end')
-});
+    trialStart: timestamp("trial_start"),
+    trialEnd: timestamp("trial_end")
+})
+
+// Relations
+import { relations } from "drizzle-orm"
+
+export const usersRelations = relations(users, ({ many }) => ({
+    registrations: many(registrations),
+    messages: many(messages),
+    sessions: many(sessions),
+    accounts: many(accounts)
+}))
+
+export const eventsRelations = relations(events, ({ many, one }) => ({
+    categories: many(eventCategories),
+    tickets: many(tickets),
+    registrations: many(registrations),
+    statistics: one(eventStatistics, {
+        fields: [events.id],
+        references: [eventStatistics.eventId]
+    })
+}))
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+    events: many(eventCategories)
+}))
+
+export const eventCategoriesRelations = relations(
+    eventCategories,
+    ({ one }) => ({
+        event: one(events, {
+            fields: [eventCategories.eventId],
+            references: [events.id]
+        }),
+        category: one(categories, {
+            fields: [eventCategories.categoryId],
+            references: [categories.id]
+        })
+    })
+)
+
+export const ticketsRelations = relations(tickets, ({ one, many }) => ({
+    event: one(events, {
+        fields: [tickets.eventId],
+        references: [events.id]
+    }),
+    attendees: many(attendees)
+}))
+
+export const registrationsRelations = relations(
+    registrations,
+    ({ one, many }) => ({
+        event: one(events, {
+            fields: [registrations.eventId],
+            references: [events.id]
+        }),
+        user: one(users, {
+            fields: [registrations.userId],
+            references: [users.id]
+        }),
+        attendees: many(attendees)
+        // Removed circular reference to eventStatistics from registrations
+    })
+)
+
+export const attendeesRelations = relations(attendees, ({ one }) => ({
+    registration: one(registrations, {
+        fields: [attendees.registrationId],
+        references: [registrations.id]
+    }),
+    ticket: one(tickets, {
+        fields: [attendees.ticketId],
+        references: [tickets.id]
+    })
+}))
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+    sender: one(users, {
+        fields: [messages.senderId],
+        references: [users.id]
+    }),
+    event: one(events, {
+        fields: [messages.eventId],
+        references: [events.id]
+    })
+}))
+
+export const eventStatisticsRelations = relations(
+    eventStatistics,
+    ({ one }) => ({
+        event: one(events, {
+            fields: [eventStatistics.eventId],
+            references: [events.id]
+        })
+    })
+)
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+    user: one(users, {
+        fields: [sessions.userId],
+        references: [users.id]
+    })
+}))
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+    user: one(users, {
+        fields: [accounts.userId],
+        references: [users.id]
+    })
+}))
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+    // Removed user reference to avoid potential circular references
+}))

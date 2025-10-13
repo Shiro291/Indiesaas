@@ -96,7 +96,7 @@ export const HeroSection = () => {
                     <Image
                         width={1200}
                         height={1200}
-                        className="relative mx-auto max-w-5xl flex w-full items-center rounded-b-lg "
+                        className="relative mx-auto flex w-full max-w-5xl items-center rounded-b-lg "
                         src={
                             theme === "light" ? "/dash-light.png" : "/dash.png"
                         }

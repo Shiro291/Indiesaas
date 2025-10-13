@@ -78,7 +78,7 @@ export default function PlanSelector({
                                 </p>
                                 {plan.trialDays > 0 && (
                                     <span className="text-xs">
-                                    {plan.trialDays}-day free trial
+                                        {plan.trialDays}-day free trial
                                     </span>
                                 )}
                             </div>

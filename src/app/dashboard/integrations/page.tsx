@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function IntegrationsPage() {
     return (
         <div className="space-y-6">
-            <PageHeader 
+            <PageHeader
                 title="Integrations page"
                 description="Connect your apps and services to your dashboard."
             />
