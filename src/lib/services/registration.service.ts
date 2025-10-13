@@ -11,10 +11,8 @@ import {
 import { eq, and, inArray, gte, lte, sql } from "drizzle-orm";
 import { ipaymuService } from "@/lib/ipaymu/ipaymu.service";
 import { randomUUID } from "crypto";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { site } from "@/config/site";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface CreateRegistrationRequest {
   eventId: number;
@@ -253,8 +251,17 @@ export class RegistrationService {
       throw new Error("User not found for registration");
     }
 
-    // Send confirmation email using Resend
-    await resend.emails.send({
+    // Create Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
+      }
+    });
+
+    // Send confirmation email using Nodemailer
+    await transporter.sendMail({
       from: site.mailFrom,
       to: user.email,
       subject: `Registration Confirmation for ${registration.event.title}`,

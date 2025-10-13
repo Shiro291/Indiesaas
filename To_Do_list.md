@@ -10,7 +10,7 @@
 - ✅ Better Auth UI authentication system
 - ✅ Ipaymu payment integration
 - ✅ UploadThing file upload service
-- ✅ Resend email service
+- ✅ Nodemailer email service
 - ✅ Biome linter and formatter
 
 ### Database Schema

@@ -27,7 +27,7 @@ EventTS is a modern, full-stack web platform for event discovery and management 
 - **Authentication**: Better Auth UI
 - **Payments**: Ipaymu
 - **File Uploads**: UploadThing
-- **Emails**: Resend
+- **Emails**: Nodemailer
 - **UI Components**: shadcn/ui
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
@@ -122,8 +122,10 @@ IPAYMU_API_KEY="" # Your Ipaymu API key
 IPAYMU_MERCHANT_CODE="" # Your Ipaymu merchant code
 IPAYMU_BASE_URL="https://my.ipaymu.com" # Ipaymu base URL (production or sandbox)
 
-# Needed for emails (Resend)
-RESEND_API_KEY="" # Your Resend API key
+# Needed for emails (Nodemailer)
+GMAIL_USER="" # Your Gmail address for sending emails
+GMAIL_APP_PASSWORD="" # Your Gmail app password
+MAIL_FROM="" # Email address to send from (can be same as GMAIL_USER)
 MAIL_FROM="noreply@yourdomain.com" # Email address to send from
 
 # Needed for file uploads (UploadThing)

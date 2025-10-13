@@ -20,7 +20,7 @@
 - **Authentication:** Implement user and admin authentication using **Better Auth UI**. This will provide pre-built, secure components for login, signup, and password management.
 - **Payments:** Integrate **Ipaymu** as the exclusive payment provider. Handle creating payment transactions, managing user redirects to the payment page, and processing callbacks to verify transaction status.
 - **File Uploads:** Use **UploadThing** for all file uploads, such as event images, attendee biodata, and parental consent documents. This provides a streamlined solution for file handling and storage.
-- **Emails:** Use **Resend** to send all transactional emails, including registration confirmations, payment receipts, and bulk messages to attendees.
+- **Emails:** Use **Nodemailer** to send all transactional emails, including registration confirmations, payment receipts, and bulk messages to attendees.
 - **Code Quality:** Configure and use **Biome** as the linter and formatter across the entire monorepo to maintain consistent and clean code.
 
 ---
@@ -81,7 +81,7 @@
 - **Backend:**
     - Create an `IpaymuService` to handle all interactions with the Ipaymu API. This service will be responsible for creating payment transactions and, if needed, processing refunds.
     - Create a dedicated API endpoint for Ipaymu callbacks, e.g., `POST /api/payments/ipaymu-callback`. This endpoint must be secured (e.g., by verifying a signature or token from Ipaymu) to prevent fraudulent requests.
-    - When a callback is received for a successful payment, the handler should find the corresponding registration, update its status to 'confirmed', and trigger a confirmation email via **Resend**.
+    - When a callback is received for a successful payment, the handler should find the corresponding registration, update its status to 'confirmed', and trigger a confirmation email via **Nodemailer**.
 - **Frontend:** The frontend's primary role is to initiate the payment and redirect the user to the Ipaymu-hosted payment page where they can choose from various methods (Virtual Account, GoPay, OVO, etc.).
 
 **Invoicing:**
@@ -89,7 +89,7 @@
 - **Frontend:** On the user's dashboard and registration status pages, provide a button to "Download Invoice."
 
 **Bulk Messaging:**
-- **Backend:** Create a `Message` model and API endpoints for admins to create and send messages. The message creation form should include filters (e.g., by ticket type, payment status). When an admin sends a message, dispatch a background job that queries the filtered users and sends emails to all of them using **Resend**.
+- **Backend:** Create a `Message` model and API endpoints for admins to create and send messages. The message creation form should include filters (e.g., by ticket type, payment status). When an admin sends a message, dispatch a background job that queries the filtered users and sends emails to all of them using **Nodemailer**.
 
 **Event Archiving:**
 - **Backend:** Add a `status` enum to the `Event` model with values `ACTIVE` and `ARCHIVED`.
@@ -108,7 +108,7 @@ EventTS is a modern, full-stack web platform for event discovery and management.
 *   **Authentication:** Better Auth UI for secure and pre-built login/signup flows.
 *   **Payment Provider:** Ipaymu for handling all online transactions.
 *   **File Uploads:** UploadThing for modern, integrated file storage and validation.
-*   **Email Service:** Resend for sending transactional emails.
+*   **Email Service:** Nodemailer for sending transactional emails.
 *   **Code Quality:** Biome for fast and reliable linting and formatting.
 
 **Key Features for Public Users**
@@ -131,4 +131,4 @@ EventTS is a modern, full-stack web platform for event discovery and management.
 **Critical System Integrations**
 *   **Ipaymu Payments:** The system integrates with Ipaymu to create payment transactions and redirects users to the Ipaymu payment page. Payment status is verified and updated via a secure callback API.
 *   **UploadThing:** All file handling, from event cover images to attendee documents, is managed through UploadThing, providing a seamless and secure upload experience.
-*   **Resend Emails:** All automated communications, such as registration confirmations and payment receipts, are reliably sent using the Resend email service.
+*   **Nodemailer Emails:** All automated communications, such as registration confirmations and payment receipts, are reliably sent using the Nodemailer email service.

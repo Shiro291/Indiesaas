@@ -20,19 +20,19 @@ export const TeamSection = () => {
     const teamList: TeamProps[] = [
         {
             imageUrl:
-                "/indie.png",
-            firstName: "Indie",
-            lastName: "CEO",
-            positions: ["Fullstack Developer", "Creator Of This Website"],
+                "/avatar-placeholder.png",
+            firstName: "EventTS",
+            lastName: "Dev Team",
+            positions: ["Fullstack Developer", "Event Management Platform"],
             socialNetworks: [
                 
                 {
                     name: "Github",
-                    url: "https://github.com/indieceo"
+                    url: "https://github.com/eventts/eventts"
                 },
                 {
                     name: "X",
-                    url: "https://x.com/indieceo"
+                    url: "https://x.com/eventts"
                 }
             ]
         },
@@ -49,7 +49,7 @@ export const TeamSection = () => {
                 },
                 {
                     name: "X",
-                    url: "https://x.com/indieceo"
+                    url: "https://x.com/eventts"
                 }
             ]
         },
@@ -66,7 +66,7 @@ export const TeamSection = () => {
                 },
                 {
                     name: "Github",
-                    url: "https://github.com/indieceo"
+                    url: "https://github.com/eventts/eventts"
                 }
             ]
         },
@@ -83,11 +83,11 @@ export const TeamSection = () => {
                 },
                 {
                     name: "Github",
-                    url: "https://github.com/indieceo"
+                    url: "https://github.com/eventts/eventts"
                 },
                 {
                     name: "X",
-                    url: "https://x.com/indieceo"
+                    url: "https://x.com/eventts"
                 }
             ]
         },
@@ -117,7 +117,7 @@ export const TeamSection = () => {
                 },
                 {
                     name: "Github",
-                    url: "https://github.com/indieceo"
+                    url: "https://github.com/eventts/eventts"
                 }
             ]
         },
@@ -134,11 +134,11 @@ export const TeamSection = () => {
                 },
                 {
                     name: "Github",
-                    url: "https://github.com/indieceo"
+                    url: "https://github.com/eventts/eventts"
                 },
                 {
                     name: "X",
-                    url: "https://x.com/indieceo"
+                    url: "https://x.com/eventts"
                 }
             ]
         },
@@ -151,7 +151,7 @@ export const TeamSection = () => {
             socialNetworks: [
                 {
                     name: "X",
-                    url: "https://x.com/indieceo"
+                    url: "https://x.com/eventts"
                 }
             ]
         }

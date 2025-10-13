@@ -47,7 +47,7 @@ export default function ProtectedPage({
                                         className="font-semibold"
                                     >
                                         <Link
-                                            href="https://github.com/indieceo/Indiesaas"
+                                            href="https://github.com/eventts/eventts"
                                             target="_blank"
                                             aria-label="Clone Now"
                                         >

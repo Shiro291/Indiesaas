@@ -133,7 +133,7 @@ export const ContactSection = () => {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="Indie"
+                                                        placeholder="Event"
                                                         {...field}
                                                     />
                                                 </FormControl>

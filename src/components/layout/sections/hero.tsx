@@ -28,7 +28,7 @@ export const HeroSection = () => {
                         <h1>
                             Experience the
                             <span className="bg-gradient-to-r from-[#da5319] to-primary bg-clip-text px-2 text-transparent">
-                                Indie SaaS
+                                Event Management
                             </span>
                             Boilerplate
                         </h1>

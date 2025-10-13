@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, MapPin, Users, Clock } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "@daveyplate/better-auth-ui/react";
+import { authClient } from "@/lib/auth-client";
+// Session is obtained via authClient.useSession()
 import { useRouter } from "next/navigation";
 
 interface Event {
@@ -46,7 +47,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [countdown, setCountdown] = useState("");
   const [selectedTickets, setSelectedTickets] = useState<{[key: number]: number}>({});
   
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
 
   useEffect(() => {

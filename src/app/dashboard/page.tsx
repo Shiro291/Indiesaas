@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users, Clock, CreditCard, Download } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "@daveyplate/better-auth-ui/react";
+import { authClient } from "@/lib/auth-client";
+// Session is obtained via authClient.useSession()
 
 interface Event {
   id: number;
@@ -41,7 +42,7 @@ interface Registration {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
 

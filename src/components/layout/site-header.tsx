@@ -19,12 +19,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, Menu, X } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { useSession } from "@daveyplate/better-auth-ui/react";
+// Session is obtained via authClient.useSession()
 
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">

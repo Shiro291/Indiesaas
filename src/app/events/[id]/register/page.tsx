@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useSession } from "@daveyplate/better-auth-ui/react";
+import { authClient } from "@/lib/auth-client";
+// Session is obtained via authClient.useSession()
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "@/components/uploadthing";
 
@@ -57,7 +58,7 @@ export default function EventRegistrationPage({ params }: { params: { id: string
   const [step, setStep] = useState(1); // 1: Ticket selection, 2: Attendee details, 3: Payment
   const [selectedTickets, setSelectedTickets] = useState<{[key: number]: number}>({});
   
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
 
   useEffect(() => {
