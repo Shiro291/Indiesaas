@@ -28,7 +28,7 @@ import { auth } from "@/lib/auth"
  */
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check authentication
@@ -44,7 +44,8 @@ export async function POST(
             return Response.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        const registrationId = parseInt(params.id)
+        const { id } = await params
+        const registrationId = parseInt(id)
         if (isNaN(registrationId)) {
             return Response.json(
                 { error: "Invalid registration ID" },

@@ -34,9 +34,7 @@ export default async function AuthPage({
                 </Button>
             </Link>
 
-            <AuthLoading>
-                <WelcomeToast />
-            </AuthLoading>
+            {/* Auth toast removed to prevent interference with auth flow */}
 
             <AuthCard pathname={pathname} />
 

@@ -1,17 +1,19 @@
 "use client"
 
 import { toast } from "sonner"
+import { useEffect, useRef } from "react"
 
 export function WelcomeToast() {
-    const promise = () =>
-        new Promise((resolve) =>
-            setTimeout(() => resolve({ name: "Sonner" }), 2000)
-        )
+    const hasShownToast = useRef(false)
 
-    toast.promise(promise, {
-        loading: "Authenticating...",
-        success: "Welcome 👋 You are now logged in.",
-        error: "Error"
-    })
+    useEffect(() => {
+        // Only show toast once per page load to avoid interference
+        if (!hasShownToast.current) {
+            hasShownToast.current = true
+            // Optional: Show toast only if user is not already authenticated
+            toast.info("Welcome to EventTS! Sign in to access all features.")
+        }
+    }, [])
+
     return null
 }

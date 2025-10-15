@@ -55,8 +55,8 @@ export async function GET(request: NextRequest) {
 
         // Get analytics report
         const report = await analyticsService.getAnalyticsReport({
-            type,
-            period: startDate && endDate ? "custom" : period,
+            type: type as "revenue" | "registrations" | "events" | "attendees",
+            period: (startDate && endDate ? "custom" : period) as "week" | "month" | "quarter" | "year" | "custom",
             startDate: startDate ? new Date(startDate) : undefined,
             endDate: endDate ? new Date(endDate) : undefined
         })

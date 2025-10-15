@@ -29,7 +29,7 @@ import { auth } from "@/lib/auth"
  */
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check authentication - use cookies() helper for reliable cookie handling
@@ -45,7 +45,8 @@ export async function POST(
             return Response.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        const eventId = parseInt(params.id)
+        const { id } = await params
+        const eventId = parseInt(id)
         if (isNaN(eventId)) {
             return Response.json({ error: "Invalid event ID" }, { status: 400 })
         }

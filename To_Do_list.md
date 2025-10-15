@@ -183,5 +183,10 @@
 - [x] Resolve self-referencing type annotation errors (completed v0001)
 - [x] Fix enum value assignment errors in registration.service.ts (completed v0001)
 - [x] Correct attendee property access issues (completed v0001)
-- [ ] Install project dependencies for type checking verification
+- [x] Add missing imports and fix type assignments in findMany calls (completed v0001)
+- [x] Fix SQL<unknown> type issues in where clauses (completed v0001)
+- [x] Add proper typing for anonymous function parameters (completed v0001)
+- [x] Fix test file syntax and type errors (completed v0001)
+- [x] Add vitest dependency to package.json (completed v0001)
+- [x] Install project dependencies for type checking verification
 - [ ] Run full TypeScript compilation check

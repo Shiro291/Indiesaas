@@ -22,10 +22,11 @@ import { eventService } from "@/lib/services/event.service"
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const eventId = parseInt(params.id)
+        const { id } = await params
+        const eventId = parseInt(id)
 
         if (isNaN(eventId)) {
             return Response.json({ error: "Invalid event ID" }, { status: 400 })

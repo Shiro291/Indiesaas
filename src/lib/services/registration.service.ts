@@ -90,7 +90,7 @@ export class RegistrationService {
 
             for (const selection of request.ticketSelections) {
                 const ticket = availableTickets.find(
-                    (t) => t.id === selection.ticketId
+                    (t: { id: number }) => t.id === selection.ticketId
                 )
                 if (!ticket) {
                     throw new Error(
@@ -313,7 +313,7 @@ export class RegistrationService {
         beltLevel?: "DASAR" | "MC_I" | "MC_II" | "MC_III" | "MC_IV",
         status?: "PENDING" | "CONFIRMED" | "CANCELLED"
     ) {
-        let whereClause = eq(attendees.registrationId, registrations.id)
+        let whereClause: any = eq(attendees.registrationId, registrations.id)
         if (ageCategory) {
             whereClause = and(
                 whereClause,
@@ -508,7 +508,7 @@ export class RegistrationService {
             limit = 10
         } = filters || {}
 
-        let whereClause = eq(registrations.eventId, eventId)
+        let whereClause: any = eq(registrations.eventId, eventId)
         if (status) {
             whereClause = and(whereClause, eq(registrations.status, status))
         }
@@ -526,7 +526,7 @@ export class RegistrationService {
             with: {
                 attendees: {
                     where: (attendeeFilters) => {
-                        let attendeeWhereClause = eq(
+                        let attendeeWhereClause: any = eq(
                             attendeeFilters.registrationId,
                             registrations.id
                         )

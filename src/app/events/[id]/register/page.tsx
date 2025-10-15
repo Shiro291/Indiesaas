@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,7 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { authClient } from "@/lib/auth-client"
 // Session is obtained via authClient.useSession()
 import { useRouter } from "next/navigation"
-import { UploadDropzone } from "@/components/uploadthing"
+import { BiodataUploadDropzone, ConsentUploadDropzone } from "@/components/uploadthing"
 
 interface Ticket {
     id: number
@@ -603,10 +603,9 @@ export default function EventRegistrationPage({
 
                                             <div className="mt-4">
                                                 <Label>Biodata Document</Label>
-                                                <UploadDropzone
-                                                    endpoint="biodataUploader"
+                                                <BiodataUploadDropzone
                                                     onClientUploadComplete={(
-                                                        res
+                                                        res: any
                                                     ) => {
                                                         if (res && res[0]) {
                                                             handleFileUpload(
@@ -637,10 +636,9 @@ export default function EventRegistrationPage({
                                                     Parental Consent (if under
                                                     18)
                                                 </Label>
-                                                <UploadDropzone
-                                                    endpoint="consentUploader"
+                                                <ConsentUploadDropzone
                                                     onClientUploadComplete={(
-                                                        res
+                                                        res: any
                                                     ) => {
                                                         if (res && res[0]) {
                                                             handleFileUpload(

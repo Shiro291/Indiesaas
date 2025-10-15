@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
         // Get analytics data
         const analytics = await analyticsService.getDashboardAnalytics({
-            period: startDate && endDate ? "custom" : period,
+            period: (startDate && endDate ? "custom" : period) as "week" | "month" | "quarter" | "year" | "custom",
             startDate: startDate ? new Date(startDate) : undefined,
             endDate: endDate ? new Date(endDate) : undefined
         })

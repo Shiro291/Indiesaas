@@ -29,7 +29,7 @@ import { auth } from "@/lib/auth"
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check authentication - use cookies() helper for reliable cookie handling
@@ -56,7 +56,8 @@ export async function GET(
             )
         }
 
-        const eventId = parseInt(params.id)
+        const { id } = await params
+        const eventId = parseInt(id)
         if (isNaN(eventId)) {
             return Response.json({ error: "Invalid event ID" }, { status: 400 })
         }

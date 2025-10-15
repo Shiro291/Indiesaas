@@ -29,19 +29,20 @@ import { registrationService } from "@/lib/services/registration.service"
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const eventId = parseInt(params.id)
+        const { id } = await params
+        const eventId = parseInt(id)
         if (isNaN(eventId)) {
             return Response.json({ error: "Invalid event ID" }, { status: 400 })
         }
 
         const { searchParams } = new URL(request.url)
-        const ageCategory = searchParams.get("ageCategory") || undefined
-        const beltLevel = searchParams.get("beltLevel") || undefined
-        const status = searchParams.get("status") || undefined
-        const paymentStatus = searchParams.get("paymentStatus") || undefined
+        const ageCategory = searchParams.get("ageCategory") as "TK" | "SD" | "SMP" | "SMA" | undefined || undefined
+        const beltLevel = searchParams.get("beltLevel") as "DASAR" | "MC_I" | "MC_II" | "MC_III" | "MC_IV" | undefined || undefined
+        const status = searchParams.get("status") as "PENDING" | "CONFIRMED" | "CANCELLED" | undefined || undefined
+        const paymentStatus = searchParams.get("paymentStatus") as "PENDING" | "PAID" | "FAILED" | "REFUNDED" | undefined || undefined
         const page = parseInt(searchParams.get("page") || "1")
         const limit = parseInt(searchParams.get("limit") || "10")
 

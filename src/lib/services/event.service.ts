@@ -3,7 +3,8 @@ import {
     events,
     eventCategories,
     tickets,
-    eventStatistics
+    eventStatistics,
+    categories
 } from "@/database/schema"
 import { and, eq, gte, ilike, lt, lte, sql } from "drizzle-orm"
 import type { PgTransaction } from "drizzle-orm/pg-core"
@@ -204,7 +205,7 @@ export class EventService {
         const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
         // Get events without statistics to avoid potential issues with missing statistics
-        const eventResults: EventWithCategoriesAndTickets[] = await db.query.events.findMany({
+        const eventResults = await db.query.events.findMany({
             where: whereClause,
             with: {
                 categories: {
@@ -214,12 +215,12 @@ export class EventService {
                 },
                 tickets: true
             },
-            orderBy: (_events: typeof events, { desc }: { desc: (column: any) => any }) => [desc(_events.createdAt)]
-        })
+            orderBy: (fields, { desc }) => [desc(fields.createdAt)]
+        }) as EventWithCategoriesAndTickets[]
 
         // Get the event IDs to fetch their statistics separately
         const eventIds = eventResults.map(event => event.id);
-        
+
         // Fetch statistics separately to handle cases where statistics might not exist
         let eventStats: { eventId: number; totalRegistrations: number }[] = [];
         if (eventIds.length > 0) {
@@ -227,7 +228,7 @@ export class EventService {
                 eventId: eventStatistics.eventId,
                 totalRegistrations: eventStatistics.totalRegistrations
             }).from(eventStatistics).where(
-                sql`${eventStatistics.eventId} IN (${sql.join(eventIds, sql`, `)})`
+                sql`event_id IN (${sql.join(eventIds.map(id => sql`${id}`), sql`, `)})`
             );
         }
 
@@ -311,8 +312,12 @@ export class EventService {
                     }
                 }
             },
-            orderBy: (_events: typeof events, { desc }: { desc: (column: any) => any }) => [desc(_events.createdAt)]
-        })
+            orderBy: (fields, { desc }) => [desc(fields.createdAt)]
+        }) as (InferSelectModel<typeof events> & {
+            categories: (InferSelectModel<typeof eventCategories> & {
+                category: InferSelectModel<typeof categories>
+            })[]
+        })[]
     }
 
     /**
